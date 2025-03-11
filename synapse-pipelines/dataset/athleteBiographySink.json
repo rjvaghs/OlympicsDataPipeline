@@ -1,0 +1,22 @@
+{
+    "name": "athleteBiographySink",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "datalake",
+            "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "Parquet",
+        "typeProperties": {
+            "location": {
+                "type": "AzureBlobFSLocation",
+                "fileName": "athleteBiography/athleteBiography.parquet",
+                "folderPath": "transformed_data/olympics",
+                "fileSystem": "olympics"
+            },
+            "compressionCodec": "snappy"
+        },
+        "schema": []
+    },
+    "type": "Microsoft.Synapse/workspaces/datasets"
+}

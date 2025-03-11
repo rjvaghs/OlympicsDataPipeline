@@ -1,0 +1,66 @@
+{
+    "name": "olympicsData",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "datalake",
+            "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "DelimitedText",
+        "typeProperties": {
+            "location": {
+                "type": "AzureBlobFSLocation",
+                "fileName": "Olympic_Athlete_Biography.csv",
+                "folderPath": "raw_data/olympics/unzippedData",
+                "fileSystem": "olympics"
+            },
+            "columnDelimiter": ",",
+            "escapeChar": "\\",
+            "firstRowAsHeader": true,
+            "quoteChar": "\""
+        },
+        "schema": [
+            {
+                "name": "athlete_id",
+                "type": "String"
+            },
+            {
+                "name": "name",
+                "type": "String"
+            },
+            {
+                "name": "sex",
+                "type": "String"
+            },
+            {
+                "name": "born",
+                "type": "String"
+            },
+            {
+                "name": "height",
+                "type": "String"
+            },
+            {
+                "name": "weight",
+                "type": "String"
+            },
+            {
+                "name": "country",
+                "type": "String"
+            },
+            {
+                "name": "country_noc",
+                "type": "String"
+            },
+            {
+                "name": "description",
+                "type": "String"
+            },
+            {
+                "name": "special_notes",
+                "type": "String"
+            }
+        ]
+    },
+    "type": "Microsoft.Synapse/workspaces/datasets"
+}

@@ -1,0 +1,30 @@
+{
+    "name": "olympicsSparkTransformedData",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "datalake",
+            "type": "LinkedServiceReference"
+        },
+        "parameters": {
+            "folderPath": {
+                "type": "String"
+            }
+        },
+        "annotations": [],
+        "type": "Parquet",
+        "typeProperties": {
+            "location": {
+                "type": "AzureBlobFSLocation",
+                "fileName": {
+                    "value": "@dataset().folderPath",
+                    "type": "Expression"
+                },
+                "folderPath": "transformed_data/spark_transformed",
+                "fileSystem": "olympics"
+            },
+            "compressionCodec": "snappy"
+        },
+        "schema": []
+    },
+    "type": "Microsoft.Synapse/workspaces/datasets"
+}

@@ -1,0 +1,20 @@
+{
+    "name": "olympicSink",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "AzureDataLakeStorage1",
+            "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "Binary",
+        "typeProperties": {
+            "location": {
+                "type": "AzureBlobFSLocation",
+                "fileName": "olympicZip.zip",
+                "folderPath": "raw_data/olympics",
+                "fileSystem": "olympics"
+            }
+        }
+    },
+    "type": "Microsoft.Synapse/workspaces/datasets"
+}

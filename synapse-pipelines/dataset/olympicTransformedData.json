@@ -1,0 +1,62 @@
+{
+    "name": "olympicTransformedData",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "AzureDataLakeStorage1",
+            "type": "LinkedServiceReference"
+        },
+        "annotations": [],
+        "type": "Parquet",
+        "typeProperties": {
+            "location": {
+                "type": "AzureBlobFSLocation",
+                "folderPath": "transformed_data/spark_transformed",
+                "fileSystem": "olympics"
+            },
+            "compressionCodec": "snappy"
+        },
+        "schema": [
+            {
+                "name": "athlete_id",
+                "type": "INT32"
+            },
+            {
+                "name": "name",
+                "type": "UTF8"
+            },
+            {
+                "name": "sex",
+                "type": "UTF8"
+            },
+            {
+                "name": "born",
+                "type": "UTF8"
+            },
+            {
+                "name": "height",
+                "type": "INT_16"
+            },
+            {
+                "name": "weight",
+                "type": "INT_16"
+            },
+            {
+                "name": "country",
+                "type": "UTF8"
+            },
+            {
+                "name": "noc",
+                "type": "UTF8"
+            },
+            {
+                "name": "description",
+                "type": "UTF8"
+            },
+            {
+                "name": "special_notes",
+                "type": "UTF8"
+            }
+        ]
+    },
+    "type": "Microsoft.Synapse/workspaces/datasets"
+}

@@ -13,18 +13,12 @@ This project ingests **Olympics data from Kaggle** into **Azure Data Lake** and 
 📂 olympics-azure-project
 ├── 📜 README.md  # Project documentation
 ├── 📂 azure-function
-│   ├── blob_trigger_function.py  # Azure function to unzip files
-│   ├── requirements.txt  # Dependencies for the function
-├── 📂 synapse-pipeline
-│   ├── ingest_olympics_pipeline.json  # Synapse pipeline JSON
-│   ├── transformations_notebook.ipynb  # Apache Spark notebook for transformation
-├── 📂 sql-scripts
-│   ├── create_staging_table.sql  # SQL script for staging table
-│   ├── insert_into_target.sql  # SQL script for final table
+├── 📂 data
+├── 📂 data-architecture
 ├── 📂 powerbi-report
-│   ├── olympics_dashboard.pbix  # Power BI visualization
-└── 📂 data-samples
-    ├── sample_olympics_data.zip  # Sample ZIP file with CSVs
+├── 📂 sql-scripts
+├── 📂 synapse-pipeline
+
 ```
 
 ## Data Architecture

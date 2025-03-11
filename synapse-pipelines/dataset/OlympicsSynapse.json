@@ -1,0 +1,25 @@
+{
+    "name": "OlympicsSynapse",
+    "properties": {
+        "linkedServiceName": {
+            "referenceName": "olympicsSynapseLink",
+            "type": "LinkedServiceReference"
+        },
+        "parameters": {
+            "tableNameParam": {
+                "type": "String"
+            }
+        },
+        "annotations": [],
+        "type": "AzureSqlDWTable",
+        "schema": [],
+        "typeProperties": {
+            "schema": "dbo",
+            "table": {
+                "value": "@dataset().tableNameParam",
+                "type": "Expression"
+            }
+        }
+    },
+    "type": "Microsoft.Synapse/workspaces/datasets"
+}

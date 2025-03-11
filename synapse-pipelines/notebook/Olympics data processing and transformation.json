@@ -1,0 +1,533 @@
+{
+    "name": "Olympics data processing and transformation",
+    "properties": {
+        "folder": {
+            "name": "Apache Spark"
+        },
+        "nbformat": 4,
+        "nbformat_minor": 2,
+        "bigDataPool": {
+            "referenceName": "olympics",
+            "type": "BigDataPoolReference"
+        },
+        "sessionProperties": {
+            "driverMemory": "28g",
+            "driverCores": 4,
+            "executorMemory": "28g",
+            "executorCores": 4,
+            "numExecutors": 2,
+            "runAsWorkspaceSystemIdentity": false,
+            "conf": {
+                "spark.dynamicAllocation.enabled": "false",
+                "spark.dynamicAllocation.minExecutors": "2",
+                "spark.dynamicAllocation.maxExecutors": "2",
+                "spark.autotune.trackingId": "7869a275-c240-47ae-b202-73db720608cf"
+            }
+        },
+        "metadata": {
+            "saveOutput": true,
+            "enableDebugMode": false,
+            "language_info": {
+                "name": "python"
+            },
+            "a365ComputeOptions": {
+                "id": "/subscriptions/99382a15-8bd5-4b9e-b1de-c18d1fa709dc/resourceGroups/olympic_pipeline/providers/Microsoft.Synapse/workspaces/olympicspipeline/bigDataPools/olympics",
+                "name": "olympics",
+                "type": "Spark",
+                "endpoint": "https://olympicspipeline.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/olympics",
+                "auth": {
+                    "type": "AAD",
+                    "authResource": "https://dev.azuresynapse.net",
+                    "authHeader": null
+                },
+                "sparkVersion": "3.4",
+                "nodeCount": 3,
+                "cores": 4,
+                "memory": 28,
+                "extraHeader": null
+            },
+            "sessionKeepAliveTimeout": 30
+        },
+        "cells": [
+            {
+                "cell_type": "markdown",
+                "metadata": {
+                    "nteract": {
+                        "transient": {
+                            "deleting": false
+                        }
+                    }
+                },
+                "source": [
+                    "### Creating Dataframe from the parquet data source"
+                ]
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "biography = spark.read.format(\"parquet\")\\\n",
+                    "                      .option(\"header\",\"true\")\\\n",
+                    "                      .option(\"inferSchema\",\"true\")\\\n",
+                    "                      .load(\"abfss://olympics@olympicdata2309.dfs.core.windows.net/transformed_data/olympics/athleteBiography/*.parquet\")"
+                ],
+                "outputs": [],
+                "execution_count": 69
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "event = spark.read.format(\"parquet\")\\\n",
+                    "                      .option(\"header\",\"true\")\\\n",
+                    "                      .option(\"inferSchema\",\"true\")\\\n",
+                    "                      .load(\"abfss://olympics@olympicdata2309.dfs.core.windows.net/transformed_data/olympics/athleteEventDetails/*.parquet\")"
+                ],
+                "outputs": [],
+                "execution_count": 70
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "country = spark.read.format(\"parquet\")\\\n",
+                    "                      .option(\"header\",\"true\")\\\n",
+                    "                      .option(\"inferSchema\",\"true\")\\\n",
+                    "                      .load(\"abfss://olympics@olympicdata2309.dfs.core.windows.net/transformed_data/olympics/countryProfiles/*.parquet\")"
+                ],
+                "outputs": [],
+                "execution_count": 71
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "games = spark.read.format(\"parquet\")\\\n",
+                    "                      .option(\"header\",\"true\")\\\n",
+                    "                      .option(\"inferSchema\",\"true\")\\\n",
+                    "                      .load(\"abfss://olympics@olympicdata2309.dfs.core.windows.net/transformed_data/olympics/gamesSummary/*.parquet\")"
+                ],
+                "outputs": [],
+                "execution_count": 72
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "medals = spark.read.format(\"parquet\")\\\n",
+                    "                      .option(\"header\",\"true\")\\\n",
+                    "                      .option(\"inferSchema\",\"true\")\\\n",
+                    "                      .load(\"abfss://olympics@olympicdata2309.dfs.core.windows.net/transformed_data/olympics/medalTallyHistory/*.parquet\")"
+                ],
+                "outputs": [],
+                "execution_count": 73
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "from pyspark.sql.functions import col"
+                ],
+                "outputs": [],
+                "execution_count": 74
+            },
+            {
+                "cell_type": "markdown",
+                "metadata": {
+                    "nteract": {
+                        "transient": {
+                            "deleting": false
+                        }
+                    }
+                },
+                "source": [
+                    "#### Athlete Biography"
+                ]
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "biography.select(\"name\",\"noc\").where(col(\"country\").isNull()).show()"
+                ],
+                "outputs": [],
+                "execution_count": 75
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "biography.where(col(\"noc\") == \"IFR\").write.option(\"header\",\"true\").mode(\"overwrite\").parquet(\"abfss://olympics@olympicdata2309.dfs.core.windows.net/transformed_data/unknown_data/olympics/athleteBiogrpahy\")\n",
+                    "print(\"Write process for Athletes completed\")\n",
+                    "biography = biography.where(col(\"country\").isNotNull())"
+                ],
+                "outputs": [],
+                "execution_count": 76
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "# counting number of null values in Biography data\n",
+                    "\n",
+                    "from pyspark.sql.functions import when, isnan, count \n",
+                    "\n",
+                    "CountNullBiography = biography.select([count(when(col(c).contains('None') | \\\n",
+                    "                     col(c).contains('NULL') | \\\n",
+                    "                     col(c).contains('null') | \\\n",
+                    "                     (col(c) == '') | \\\n",
+                    "                     col(c).isNull() | \\\n",
+                    "                     isnan(c), c\n",
+                    "                     )).alias(c) \n",
+                    "                     for c in biography.columns])\n",
+                    "# no nulls found in the data\n",
+                    "print(\"Biography data processing completed\")"
+                ],
+                "outputs": [],
+                "execution_count": 77
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "CountNullBiography.show()"
+                ],
+                "outputs": [],
+                "execution_count": 78
+            },
+            {
+                "cell_type": "markdown",
+                "metadata": {
+                    "nteract": {
+                        "transient": {
+                            "deleting": false
+                        }
+                    }
+                },
+                "source": [
+                    "Height and weight has null values approximately equivalent to 33% of the data. It is better to drop the column"
+                ]
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "biography = biography.drop(col(\"height\"), col(\"weight\"))"
+                ],
+                "outputs": [],
+                "execution_count": 79
+            },
+            {
+                "cell_type": "markdown",
+                "metadata": {
+                    "nteract": {
+                        "transient": {
+                            "deleting": false
+                        }
+                    }
+                },
+                "source": [
+                    "#### Athlete Event Details"
+                ]
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "event.show(5)"
+                ],
+                "outputs": [],
+                "execution_count": 80
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "# counting number of null values in Event Details data\n",
+                    "\n",
+                    "CountNullEvent = event.select([count(when(col(c).contains('None') | \\\n",
+                    "                     col(c).contains('NULL') | \\\n",
+                    "                     col(c).contains('null') | \\\n",
+                    "                     (col(c) == '') | \\\n",
+                    "                     col(c).isNull(), c \\\n",
+                    "                     )).alias(c) \n",
+                    "                     for c in event.columns])\n",
+                    "# no nulls found in the data\n",
+                    "print(\"Event data processing completed\")"
+                ],
+                "outputs": [],
+                "execution_count": 81
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "CountNullEvent.show()"
+                ],
+                "outputs": [],
+                "execution_count": 82
+            },
+            {
+                "cell_type": "markdown",
+                "metadata": {
+                    "nteract": {
+                        "transient": {
+                            "deleting": false
+                        }
+                    }
+                },
+                "source": [
+                    "As seen from above table, edition and athlete has null values. Medal column has null values because it only has a value for the athlete who scored medal.\n",
+                    "We need to transform medal column such that it gives a value that represents the athlete with no medals."
+                ]
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "event.select(col(\"medal\")).distinct().show()"
+                ],
+                "outputs": [],
+                "execution_count": 83
+            },
+            {
+                "cell_type": "markdown",
+                "metadata": {
+                    "nteract": {
+                        "transient": {
+                            "deleting": false
+                        }
+                    }
+                },
+                "source": [
+                    "So we can replace the null values with \"No Medals\""
+                ]
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "event = event.na.fill(\"No Medal\", [\"medal\"])"
+                ],
+                "outputs": [],
+                "execution_count": 84
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "event.show(5)"
+                ],
+                "outputs": [],
+                "execution_count": 85
+            },
+            {
+                "cell_type": "markdown",
+                "metadata": {
+                    "nteract": {
+                        "transient": {
+                            "deleting": false
+                        }
+                    }
+                },
+                "source": [
+                    "#### Country Profiles"
+                ]
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "country.show(5)"
+                ],
+                "outputs": [],
+                "execution_count": 86
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "# counting number of null values in Country Profile data\n",
+                    "\n",
+                    "CountCountryProfiles = country.select([count(when(col(c).contains('None') | \\\n",
+                    "                     col(c).contains('NULL') | \\\n",
+                    "                     col(c).contains('null') | \\\n",
+                    "                     (col(c) == '') | \\\n",
+                    "                     col(c).isNull(), c \\\n",
+                    "                     )).alias(c)\n",
+                    "                     for c in country.columns])\n",
+                    "# no nulls found in the data\n",
+                    "print(\"Country Profile data processing completed\")"
+                ],
+                "outputs": [],
+                "execution_count": 87
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "CountCountryProfiles.show()"
+                ],
+                "outputs": [],
+                "execution_count": 88
+            },
+            {
+                "cell_type": "markdown",
+                "metadata": {
+                    "nteract": {
+                        "transient": {
+                            "deleting": false
+                        }
+                    }
+                },
+                "source": [
+                    "#### Games Summary"
+                ]
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "games.show(5)"
+                ],
+                "outputs": [],
+                "execution_count": 89
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "# counting number of null values in Games Summary data\n",
+                    "\n",
+                    "CountGamesSummary = games.select([count(when(col(c).contains('None') | \\\n",
+                    "                     col(c).contains('NULL') | \\\n",
+                    "                     col(c).contains('null') | \\\n",
+                    "                     (col(c) == '') | \\\n",
+                    "                     col(c).isNull(), c \\\n",
+                    "                     )).alias(c) \n",
+                    "                     for c in games.columns])\n",
+                    "\n",
+                    "print(\"Games Summary data processing completed\")\n",
+                    "CountGamesSummary.show()"
+                ],
+                "outputs": [],
+                "execution_count": 90
+            },
+            {
+                "cell_type": "markdown",
+                "metadata": {
+                    "nteract": {
+                        "transient": {
+                            "deleting": false
+                        }
+                    }
+                },
+                "source": [
+                    "With some research I found that in 1906, Intercalated Games were played and in 1956 Sweden, Summer Olympics was played"
+                ]
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "games = games.withColumn(\"edition\", when((col(\"edition_id\") == \"48\") & (col(\"noc\") == \"SWE\"), \"Summer Olympics\").otherwise(col(\"edition\")))"
+                ],
+                "outputs": [],
+                "execution_count": 91
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "games = games.withColumn(\"edition\", when((col(\"edition_id\") == \"4\") & (col(\"noc\") == \"GRE\"), \"Intercalated Olympics\").otherwise(col(\"edition\")))"
+                ],
+                "outputs": [],
+                "execution_count": 92
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "games.where(col(\"isHeld\").isNotNull()).show()"
+                ],
+                "outputs": [],
+                "execution_count": 93
+            },
+            {
+                "cell_type": "markdown",
+                "metadata": {
+                    "nteract": {
+                        "transient": {
+                            "deleting": false
+                        }
+                    }
+                },
+                "source": [
+                    "As we can see above isHeld column has null entries for the games which were successfully completed but has entries for the games that were not taken place due to War. We can replace null values with 'Yes' for successful event.\n",
+                    "Also the start date and end date is null for not held events"
+                ]
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "games = games.na.fill(\"Yes\",[\"isHeld\"])"
+                ],
+                "outputs": [],
+                "execution_count": 94
+            },
+            {
+                "cell_type": "markdown",
+                "metadata": {
+                    "nteract": {
+                        "transient": {
+                            "deleting": false
+                        }
+                    }
+                },
+                "source": [
+                    "#### Medal Tally History"
+                ]
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "medals.show(5)"
+                ],
+                "outputs": [],
+                "execution_count": 95
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "# counting number of null values in Medal Tally history data\n",
+                    "\n",
+                    "CountNullMedals = medals.select([count(when(col(c).contains('None') | \\\n",
+                    "                     col(c).contains('NULL') | \\\n",
+                    "                     col(c).contains('null') | \\\n",
+                    "                     (col(c) == '') | \\\n",
+                    "                     col(c).isNull(), c \\\n",
+                    "                     )).alias(c) \n",
+                    "                     for c in medals.columns])\n",
+                    "# no nulls found in the data\n",
+                    "print(\"Medal Tally history data processing completed\")\n",
+                    "CountNullMedals.show()"
+                ],
+                "outputs": [],
+                "execution_count": 96
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "medals.select(col(\"edition_id\"),col(\"editionYear\")).where(col(\"edition\") == \"\").distinct().show()"
+                ],
+                "outputs": [],
+                "execution_count": 97
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "medals = medals.withColumn(\"edition\", when((col(\"edition_id\") == \"48\") & (col(\"noc\") == \"SWE\"), \"Summer Olympics\").otherwise(col(\"edition\")))\n",
+                    "medals = medals.withColumn(\"edition\", when((col(\"edition_id\") == \"4\") & (col(\"noc\") == \"GRE\"), \"Intercalated Olympics\").otherwise(col(\"edition\")))"
+                ],
+                "outputs": [],
+                "execution_count": 98
+            },
+            {
+                "cell_type": "code",
+                "source": [
+                    "biography.write.option(\"header\",\"true\").mode(\"overwrite\").parquet(\"abfss://olympics@olympicdata2309.dfs.core.windows.net/transformed_data/spark_transformed/athleteBiography\")\n",
+                    "print(\"Write process for Athlete Biography completed\")\n",
+                    "\n",
+                    "event.write.option(\"header\",\"true\").mode(\"overwrite\").parquet(\"abfss://olympics@olympicdata2309.dfs.core.windows.net/transformed_data/spark_transformed/athleteEventDetails\")\n",
+                    "print(\"Write process for Athlete Event Details completed\")\n",
+                    "\n",
+                    "country.write.option(\"header\",\"true\").mode(\"overwrite\").parquet(\"abfss://olympics@olympicdata2309.dfs.core.windows.net/transformed_data/spark_transformed/countryProfiles\")\n",
+                    "print(\"Write process for Country Profiles completed\")\n",
+                    "\n",
+                    "games.write.option(\"header\",\"true\").mode(\"overwrite\").parquet(\"abfss://olympics@olympicdata2309.dfs.core.windows.net/transformed_data/spark_transformed/gamesSummary\")\n",
+                    "print(\"Write process for Games Summary completed\")\n",
+                    "\n",
+                    "medals.write.option(\"header\",\"true\").mode(\"overwrite\").parquet(\"abfss://olympics@olympicdata2309.dfs.core.windows.net/transformed_data/spark_transformed/medalTallyHistory\")\n",
+                    "print(\"Write process for Medal Tally History completed\")"
+                ],
+                "outputs": [],
+                "execution_count": 99
+            }
+        ]
+    }
+}

@@ -1,0 +1,121 @@
+{
+    "name": "Olympics integrated central pipeline",
+    "properties": {
+        "activities": [
+            {
+                "name": "Ingest Data",
+                "type": "ExecutePipeline",
+                "dependsOn": [],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "Ingest data from kaggle to data lake",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true
+                }
+            },
+            {
+                "name": "Transform and Store Data",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "Ingest Data",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "Data flow transformation",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true
+                }
+            },
+            {
+                "name": "Spark Transformation",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "Transform and Store Data",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "Spark Transformation",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true
+                }
+            },
+            {
+                "name": "Load data into Staging Table",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "Spark Transformation",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "Load data into Staging Table",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true
+                }
+            },
+            {
+                "name": "Move data from staging tables to target tables",
+                "type": "ExecutePipeline",
+                "dependsOn": [
+                    {
+                        "activity": "Load data into Staging Table",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pipeline": {
+                        "referenceName": "Move data from staging tables to target tables",
+                        "type": "PipelineReference"
+                    },
+                    "waitOnCompletion": true
+                }
+            }
+        ],
+        "folder": {
+            "name": "olympics"
+        },
+        "annotations": [],
+        "lastPublishTime": "2025-03-07T04:39:20Z"
+    },
+    "type": "Microsoft.Synapse/workspaces/pipelines"
+}

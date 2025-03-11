@@ -1,0 +1,13 @@
+{
+    "scriptFile": "__init__.py",
+    "bindings": [
+      {
+        "name": "myblob",
+        "type": "blobTrigger",
+        "direction": "in",
+        "path": "olympics/raw_data/olympics/{name}.zip",
+        "connection": "olympicdata2309_STORAGE"
+      }
+    ]
+  }
+  

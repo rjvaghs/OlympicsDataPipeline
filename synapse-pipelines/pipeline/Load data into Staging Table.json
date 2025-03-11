@@ -1,0 +1,126 @@
+{
+    "name": "Load data into Staging Table",
+    "properties": {
+        "activities": [
+            {
+                "name": "For Each Parquet",
+                "type": "ForEach",
+                "dependsOn": [
+                    {
+                        "activity": "File and Table name Lookup",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "items": {
+                        "value": "@activity('File and Table name Lookup').output.value",
+                        "type": "Expression"
+                    },
+                    "isSequential": false,
+                    "batchCount": 1,
+                    "activities": [
+                        {
+                            "name": "Copy data1",
+                            "type": "Copy",
+                            "dependsOn": [],
+                            "policy": {
+                                "timeout": "0.12:00:00",
+                                "retry": 0,
+                                "retryIntervalInSeconds": 30,
+                                "secureOutput": false,
+                                "secureInput": false
+                            },
+                            "userProperties": [],
+                            "typeProperties": {
+                                "source": {
+                                    "type": "ParquetSource",
+                                    "storeSettings": {
+                                        "type": "AzureBlobFSReadSettings",
+                                        "recursive": true,
+                                        "enablePartitionDiscovery": false
+                                    },
+                                    "formatSettings": {
+                                        "type": "ParquetReadSettings"
+                                    }
+                                },
+                                "sink": {
+                                    "type": "SqlDWSink",
+                                    "allowCopyCommand": true,
+                                    "tableOption": {
+                                        "value": "@item().TableName",
+                                        "type": "Expression"
+                                    }
+                                },
+                                "enableStaging": false
+                            },
+                            "inputs": [
+                                {
+                                    "referenceName": "olympicsSparkTransformedData",
+                                    "type": "DatasetReference",
+                                    "parameters": {
+                                        "folderPath": {
+                                            "value": "@item().FolderPath",
+                                            "type": "Expression"
+                                        }
+                                    }
+                                }
+                            ],
+                            "outputs": [
+                                {
+                                    "referenceName": "OlympicsSynapse",
+                                    "type": "DatasetReference",
+                                    "parameters": {
+                                        "tableNameParam": {
+                                            "value": "@item().TableName",
+                                            "type": "Expression"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "File and Table name Lookup",
+                "type": "Lookup",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "source": {
+                        "type": "DelimitedTextSource",
+                        "storeSettings": {
+                            "type": "AzureBlobFSReadSettings",
+                            "recursive": true,
+                            "enablePartitionDiscovery": false
+                        },
+                        "formatSettings": {
+                            "type": "DelimitedTextReadSettings"
+                        }
+                    },
+                    "dataset": {
+                        "referenceName": "olympicsLookupFileNames",
+                        "type": "DatasetReference"
+                    },
+                    "firstRowOnly": false
+                }
+            }
+        ],
+        "folder": {
+            "name": "olympics"
+        },
+        "annotations": [],
+        "lastPublishTime": "2025-03-07T03:40:46Z"
+    },
+    "type": "Microsoft.Synapse/workspaces/pipelines"
+}

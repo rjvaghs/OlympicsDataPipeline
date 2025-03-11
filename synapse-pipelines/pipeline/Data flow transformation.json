@@ -1,0 +1,121 @@
+{
+    "name": "Data flow transformation",
+    "properties": {
+        "description": "Transforming raw data using Data flow and storing it in Data Lake in Parquet format",
+        "activities": [
+            {
+                "name": "Data Flow Transformation",
+                "type": "ExecuteDataFlow",
+                "dependsOn": [
+                    {
+                        "activity": "If Condition1",
+                        "dependencyConditions": [
+                            "Completed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "dataflow": {
+                        "referenceName": "OlympicsDataflow",
+                        "type": "DataFlowReference"
+                    },
+                    "compute": {
+                        "coreCount": 8,
+                        "computeType": "General"
+                    },
+                    "traceLevel": "Fine"
+                }
+            },
+            {
+                "name": "Get Metadata of Olympics Data",
+                "type": "GetMetadata",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "dataset": {
+                        "referenceName": "olympicTransformedData",
+                        "type": "DatasetReference"
+                    },
+                    "fieldList": [
+                        "exists"
+                    ],
+                    "storeSettings": {
+                        "type": "AzureBlobFSReadSettings",
+                        "recursive": true,
+                        "enablePartitionDiscovery": false
+                    },
+                    "formatSettings": {
+                        "type": "ParquetReadSettings"
+                    }
+                }
+            },
+            {
+                "name": "If Condition1",
+                "type": "IfCondition",
+                "dependsOn": [
+                    {
+                        "activity": "Get Metadata of Olympics Data",
+                        "dependencyConditions": [
+                            "Completed"
+                        ]
+                    }
+                ],
+                "userProperties": [],
+                "typeProperties": {
+                    "expression": {
+                        "value": "@activity('Get Metadata of Olympics Data').output.exists",
+                        "type": "Expression"
+                    },
+                    "ifTrueActivities": [
+                        {
+                            "name": "Transformed Data Delete",
+                            "type": "Delete",
+                            "dependsOn": [],
+                            "policy": {
+                                "timeout": "0.12:00:00",
+                                "retry": 0,
+                                "retryIntervalInSeconds": 30,
+                                "secureOutput": false,
+                                "secureInput": false
+                            },
+                            "userProperties": [],
+                            "typeProperties": {
+                                "dataset": {
+                                    "referenceName": "transformedData",
+                                    "type": "DatasetReference"
+                                },
+                                "enableLogging": false,
+                                "storeSettings": {
+                                    "type": "AzureBlobFSReadSettings",
+                                    "recursive": true,
+                                    "enablePartitionDiscovery": false
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "folder": {
+            "name": "olympics"
+        },
+        "annotations": [],
+        "lastPublishTime": "2025-02-28T07:44:36Z"
+    },
+    "type": "Microsoft.Synapse/workspaces/pipelines"
+}
