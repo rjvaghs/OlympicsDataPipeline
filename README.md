@@ -31,35 +31,42 @@ This project ingests **Olympics data from Kaggle** into **Azure Data Lake** and 
 ![Data Architecture](https://github.com/user-attachments/assets/aad61e0d-2f69-463e-bb8f-6ea29deb951d)
 
 
-## ⚙️ Setup Instructions
-### 1️⃣ **Azure Function - Blob Trigger**
-1. Navigate to **Azure Portal** → Create a **Function App**.
-2. Deploy the function from the **`azure-function/`** folder.
-3. Update the **storage connection string** in `local.settings.json`.
+## 🚀 **End-to-End Process Flow**
+### **1️⃣ Data Ingestion (Azure Data Lake & Azure Function)**
+- The raw **Olympics dataset (ZIP file)** is sourced from **Kaggle** via **HTTP** and uploaded to **Azure Data Lake Gen2**.
+- A **Blob Trigger in Azure Functions** detects the uploaded ZIP file and **automatically extracts the CSV files** into a designated folder in Data Lake.
 
-### 2️⃣ **Azure Synapse Pipeline**
-1. Import `ingest_olympics_pipeline.json` into **Azure Synapse Studio**.
-2. Configure the **source dataset** (Azure Data Lake path).
-3. Set the **staging table** in **Dedicated SQL Pool**.
+### **2️⃣ Data Processing & Transformation**
+- The **Azure Synapse Pipeline**, orchestrated by **Azure Data Factory**, picks up the extracted CSV files from **Data Lake**.
+- **Dataflow transformation** is applied to:
+  - Standardize column names.
+  - Convert data types.
+  - Remove null and duplicate records.
+  - Enrich the dataset with calculated metrics (e.g., total medals per country).
+- Additional **Apache Spark Notebook transformations** further refine and process the dataset.
 
-### 3️⃣ **Data Transformation**
-1. Run `transformations_notebook.ipynb` in **Apache Spark Notebook**.
-2. Execute `create_staging_table.sql` and `insert_into_target.sql`.
+### **3️⃣ Data Storage (Dedicated SQL Pool - Staging & Target Tables)**
+- The cleaned data is first loaded into a **staging table** in **Dedicated SQL Pool**.
+- A **Stored Procedure** is executed to move data from the **staging table** to **target tables**, ensuring a structured data model.
 
-### 4️⃣ **Power BI Integration**
-1. Open `olympics_dashboard.pbix` in **Power BI Desktop**.
-2. Connect to the **Dedicated SQL Pool**.
-3. Publish the report to **Power BI Service**.
+### **4️⃣ Data Visualization in Power BI**
+- Power BI is connected to the **Dedicated SQL Pool** via **DirectQuery**.
+- The **Olympics Dashboard** provides insights such as:
+  - **Athlete Performance Trends** 📊
+  - **Country-wise Medal Analysis** 🥇🥈🥉
+  - **Historical Olympic Trends** 📅
 
-## 🏆 Results & Insights
-- **Athlete Performance Trends** 📊
-- **Country-wise Medal Analysis** 🥇🥈🥉
-- **Historical Olympic Trends** 📅
+## 🛠️ **Technologies Used**
+- **Azure Data Lake Storage (ADLS Gen2)** – Stores raw and processed data.
+- **Azure Functions (Blob Trigger)** – Automates file extraction from ZIP.
+- **Azure Data Factory (ADF) + Synapse Pipelines** – Orchestrates data processing.
+- **Dataflow & Apache Spark Notebooks** – Cleans and transforms the data.
+- **Dedicated SQL Pool** – Stores structured data for analysis.
+- **Power BI** – Provides interactive visualizations.
 
-## 🚀 Next Steps
-- Automate data refresh using **Azure Data Factory**.
-- Add **real-time event streaming** using **Event Hub**.
-- Implement **Machine Learning** for predictive analysis.
-
----
-This project demonstrates an end-to-end **Azure Synapse pipeline** for **large-scale data ingestion and analysis**. Perfect for **enterprise data engineering**
+## 🎯 **Key Achievements**
+✅ Automated **data ingestion** from Kaggle to Azure Data Lake.  
+✅ Efficient **file extraction** using **Azure Functions (Blob Trigger)**.  
+✅ Performed **scalable data transformation** using Dataflow & Spark.  
+✅ Implemented **SQL-based analytics** with a structured **data model**.  
+✅ Built a **dynamic Power BI dashboard** for **Olympics data insights**. 
