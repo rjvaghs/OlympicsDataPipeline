@@ -27,6 +27,9 @@ This project ingests **Olympics data from Kaggle** into **Azure Data Lake** and 
     ├── sample_olympics_data.zip  # Sample ZIP file with CSVs
 ```
 
+## Data Architecture
+![alt text](https://github.com/rjvaghs/Data Architecture/Data Architecture.png)
+
 ## ⚙️ Setup Instructions
 ### 1️⃣ **Azure Function - Blob Trigger**
 1. Navigate to **Azure Portal** → Create a **Function App**.
