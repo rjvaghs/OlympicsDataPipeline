@@ -28,7 +28,8 @@ This project ingests **Olympics data from Kaggle** into **Azure Data Lake** and 
 ```
 
 ## Data Architecture
-![alt text](https://github.com/rjvaghs/Data Architecture/Data Architecture.png)
+![Data Architecture](https://github.com/user-attachments/assets/aad61e0d-2f69-463e-bb8f-6ea29deb951d)
+
 
 ## ⚙️ Setup Instructions
 ### 1️⃣ **Azure Function - Blob Trigger**
