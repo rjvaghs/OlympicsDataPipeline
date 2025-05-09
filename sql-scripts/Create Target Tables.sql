@@ -1,6 +1,6 @@
 -- A: Create the target table
 
-CREATE TABLE biography (
+CREATE TABLE bio (
 	[athlete_id] int,
 	[name] nvarchar(4000),
 	[sex] nvarchar(4000),
@@ -16,14 +16,14 @@ WITH
 )
 GO
 
-CREATE TABLE eventDetails (
-	[edition] nvarchar(4000),
+CREATE TABLE event (
+	[edition] nvarchar(3000),
 	[editionYear] nvarchar(4000),
 	[edition_id] smallint,
 	[noc] nvarchar(4000),
 	[sport] nvarchar(4000),
 	[event] nvarchar(4000),
-	[gender] nvarchar(4000),
+	[gender] nvarchar(2),
 	[result_id] int,
 	[athlete] nvarchar(4000),
 	[athlete_id] int,
