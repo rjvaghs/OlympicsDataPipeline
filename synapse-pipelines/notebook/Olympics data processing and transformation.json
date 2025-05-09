@@ -2,7 +2,7 @@
     "name": "Olympics data processing and transformation",
     "properties": {
         "folder": {
-            "name": "Apache Spark"
+            "name": "Apache"
         },
         "nbformat": 4,
         "nbformat_minor": 2,
