@@ -1,6 +1,6 @@
 -- A: Create the target table
 
-CREATE TABLE biography (
+CREATE TABLE biodata (
 	[athlete_id] int,
 	[name] nvarchar(4000),
 	[sex] nvarchar(4000),
